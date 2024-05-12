@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image
 
 from fashion_clip.fashion_clip import FashionCLIP
-
+from src.clotho.descriptions import clothing_descriptions
 
 def load_fashion_clip_model():
     # Instantiate the FashionCLIP model
@@ -73,6 +73,39 @@ def match_images(fclip, images_dict, query):
         results[id] = similarity
         
     return results
+
+
+def get_textual_description(image_path, fclip, text_embeddings):
+    """
+    Get textual description from an image using FashionCLIP embeddings.
+
+    Args:
+    image_path (str): Path to the image file.
+    fclip (FashionCLIP): An instance of the FashionCLIP model.
+    descriptions (list): List of pre-defined text descriptions.
+    text_embeddings (np.array): Array of pre-computed text embeddings.
+
+    Returns:
+    str: The description that best matches the image.
+    """
+    descriptions=clothing_descriptions
+    # Load the image
+    image = Image.open(image_path)
+    fclip = load_fashion_clip_model()
+    # Encode the image to get its embedding
+    image_embedding = fclip.encode_images([image], batch_size=1)
+    image_embedding = image_embedding / np.linalg.norm(image_embedding, ord=2, axis=-1, keepdims=True)
+    
+    # Calculate dot products of the image embedding with all text embeddings
+    similarities = np.dot(text_embeddings, image_embedding.T).squeeze()
+    
+    # Find the index of the highest similarity score
+    best_match_idx = np.argmax(similarities)
+    
+    # Return the corresponding description
+    return descriptions[best_match_idx]
+
+
 
 
 # # Example usage

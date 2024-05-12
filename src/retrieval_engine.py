@@ -10,22 +10,9 @@ from chromadb.utils.data_loaders import ImageLoader
 
 from src.chroma.initiate_chroma_client import chroma_client
 from src.chroma.chroma_metadata_collection_index import openai_ef
-from src.chroma.clip_module import analyze_image_with_text,analyze_image_with_images,predict_three_images
+from src.clotho.clip_module import analyze_image_with_text,analyze_image_with_images,predict_three_images
 # from src.google_vision import call_vision_chain
-
-def convert_to_jpg_if_webp(image_path):
-    # Check if the file has a .webp extension
-    if image_path.lower().endswith('.webp'):
-        # Load the image
-        image = Image.open(image_path)
-        # Convert and save the image as .jpg
-        jpg_path = os.path.splitext(image_path)[0] + '.jpg'
-        image.convert("RGB").save(jpg_path, "JPEG")
-        # Close the image
-        image.close()
-        return jpg_path
-    else:
-        return image_path
+from src.parser_helpers import convert_to_jpg_if_webp
 
 
 def image_text_retrieval(input_query):

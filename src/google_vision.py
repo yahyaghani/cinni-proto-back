@@ -72,6 +72,7 @@ def crop_objects(image_path, detection_results, object_names):
                 img_cropped = img.crop((left, top, right, bottom))
                 # Convert cropped image to numpy array and store in the dictionary
                 cropped_images[object_name] = np.array(img_cropped)
+
             else:
                 print(f"No detected '{object_name}' in the image.")
     
@@ -115,7 +116,9 @@ def process_images_and_map_uris(cropped_images, actual_list):
 # # Example usage:
 
 
-def call_vision_chain(image_path,historical_context,call_retrieval=True):
+def call_vision_chain(image_path,historical_context=None,call_retrieval=True):
+    if historical_context==None:
+        historical_context=""
     objects_info = localize_objects(image_path)
     print(objects_info)
     detected_element_names = list(objects_info.keys())
@@ -132,8 +135,34 @@ def call_vision_chain(image_path,historical_context,call_retrieval=True):
     # print(cropped_image)
     cropped_images = crop_objects(image_path, objects_info, list_of_objects_to_crop)  # Assume this returns a dict of image data
     if call_retrieval==False:
-        return cropped_images
+        return cropped_images,list_of_objects_to_crop
     final_dict = process_images_and_map_uris(cropped_images, list_of_objects_to_crop)
+    print(final_dict)
+    return final_dict
+
+
+def pin_image_recieved_chain(image_path,historical_context=None,call_retrieval=True):
+    if historical_context==None:
+        historical_context=""
+    objects_info = localize_objects(image_path)
+    print(objects_info)
+    detected_element_names = list(objects_info.keys())
+    print(detected_element_names)
+    ## way too inconsistent to utilise the list parsing of detected objects , we will use a classifier here later
+    # list_of_objects_to_crop=identify_labels_to_crop(detected_element_names,historical_context)
+    # print(list_of_objects_to_crop)
+    # print(type(list_of_objects_to_crop))
+    # if type(list_of_objects_to_crop)==str:
+    #     list_of_objects_to_crop = ast.literal_eval(list_of_objects_to_crop)
+    #     print('changed type using ast')
+    #     print(list_of_objects_to_crop)
+    #     print(type(list_of_objects_to_crop))
+
+    # print(cropped_image)
+    cropped_images = crop_objects(image_path, objects_info, detected_element_names)  # Assume this returns a dict of image data
+    if call_retrieval==False:
+        return cropped_images,detected_element_names
+    final_dict = process_images_and_map_uris(cropped_images, detected_element_names)
     print(final_dict)
     return final_dict
 

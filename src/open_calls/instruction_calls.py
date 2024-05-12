@@ -8,8 +8,66 @@ from src.parser_helpers import extract_list_from_string
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+
+
+def no_context_request_more_context(keyword_list):
+    prompt=f"""
+    You are a shopping assistant, you have to help guide the user through their shopping journey, all you have are the possible things that may interest them in keyword_list:
+    
+    here are some examples of your thought process :-
+
+    Example 1 User: {example_keyword_list_1}
+    Answer: Ah that's certainly a stylish Coat, do you need me to search similar Shoes and Sunglasses with it or just a similar Coat for now?
+
+    Example 2 User: {example_keyword_list_2}
+    Answer: For your beach day, how about some trendy Sunglasses and a stylish Hat to go with your Swimwear? I can also find a new Beach Bag and Sandals if you're looking to update your beach attire.
+
+    Example 3 User:  {example_keyword_list_3}
+    Answer: Looking for another stunning Formal Dress for a wedding? I can suggest some elegant High Heels and a matching Clutch. Would you also like to see some Jewelry options or perhaps a Wrap to complete the look?
+
+    New query :{keyword_list}
+    Answer:
+"""
+    try:
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo-16k",
+            # model="gpt-4",
+
+            messages=[
+                {
+                    "role": "system",
+                    "content": f"You are a helpful Shopping Assistant, called Cinni AI, your goal is to converse with the user to delve into their shopping queries to ask leading questions that can help identify what style,color,size,occasion,materials they prefer. You utilise your previous history with the user to understand and shape their shopping journey.."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            max_tokens=500,
+            n=1,
+            temperature=0.50,  
+        )
+        # answer = response.choices[0].message['content'].strip()
+        answer_json_string=(response.model_dump_json(indent=2))
+        answer_dict = json.loads(answer_json_string)
+        answer = answer_dict['choices'][0]['message']['content']
+
+    except Exception as e:
+        answer = "None"
+        print(e)
+
+    return answer
+
+
+
+
+
+
+
+
+######
 example_query_1='i need this one'
-example_keyword_list_1=["Pants","Shoe","Outerwear","Sunglasses","Coat"]
+example_keyword_list_1=["Pants","Shoe","Outerwear","Sunglasses","Coat","Clothing"]
 example_historical_context_1="None"
 
 example_query_2='Looking for an outfit for a beach day'
@@ -59,7 +117,7 @@ def basic_shopping_prompt(user_query,keyword_list,historical_context):
             ],
             max_tokens=500,
             n=1,
-            temperature=0.65,  
+            temperature=0.15,  
         )
         # answer = response.choices[0].message['content'].strip()
         answer_json_string=(response.model_dump_json(indent=2))
@@ -74,7 +132,7 @@ def basic_shopping_prompt(user_query,keyword_list,historical_context):
 
 
 example_query_1='i need this one'
-example_keyword_list_1=["Jeans",]
+example_keyword_list_1=["Jeans","Clothing"]
 example_historical_context_1="I was thinking about what to wear for an office party tonight "
 
 
@@ -88,8 +146,8 @@ example_question="Ah, it seems like you're looking for a pair of jeans. That's a
 
 def provide_answer_options(question):
     prompt=f"""
-    You are a shopping filtering assistant, you have to identify the question provided to you ,
-    and return a python list that contains 3 shopping journey options to answer the question:
+    You are a filtering assistant, you have to identify the question provided to you ,
+    and return a python list that contains 3 options to answer the question:
     
     here are some examples of your thought process :-
 
@@ -123,7 +181,7 @@ def provide_answer_options(question):
             ],
             max_tokens=500,
             n=1,
-            temperature=0.41,  
+            temperature=0.1,  
         )
         # answer = response.choices[0].message['content'].strip()
         answer_json_string=(response.model_dump_json(indent=2))
@@ -152,7 +210,7 @@ example_historical_context_2 = "Last time I attended a service, I felt underdres
 filter_example_keyword_list_3 = ['High Heels','Tuxedo','Dress shoes','Ties','T-shirt', 'Jeans', 'Sneakers', 'Cap', 'Sundress', 'Cargo shorts', 'Leggings', 'Jumper']
 example_historical_context_3 = "Last party, my outfit was too formal and not suitable for playing games with the kids. This time, I want something more relaxed and fun to wear."
 
-filter_example_keyword_list_4=['Leg','Eyewear', 'Sunglasses']
+filter_example_keyword_list_4=['Leg','Eyewear', 'Sunglasses','Clothing']
 example_historical_context_4='prom night tonight'
 
 
@@ -173,7 +231,7 @@ def identify_labels_to_crop(keyword_list,provided_historical_context):
     Example 3 Answer: ['T-shirt', 'Jeans', 'Sneakers', 'Cap', 'Sundress', 'Cargo shorts']
 
     Example 4 query:{filter_example_keyword_list_4},{example_historical_context_4}
-    Example 4 Answer: ['Leg', 'Eyewear']
+    Example 4 Answer: ['Leg', 'Eyewear','Clothing]
 
 
     ## Query:{keyword_list},{provided_historical_context}
@@ -216,3 +274,47 @@ def identify_labels_to_crop(keyword_list,provided_historical_context):
 # historical_context='so you need jeans'
 # rest=identify_labels_to_crop(filter_test,historical_context)
 # print(rest)
+
+
+###
+
+def davinci_results_sentence(question):
+
+    prompt = f""" You are a filtering assistant, you have to identify the question provided to you ,
+    and return a python list that contains 3 options to answer the question:
+    
+    here are some examples of your thought process :-
+
+    Example 1 query:"hmm bikini , what else do you need for your beach party?"
+    Example 1 Answer : ['how about some sandals','a pair of sunglasses','maybe a Hat to prevent sunburns']
+
+    Example 2 query:"Ah, I remember you mentioning that you were looking for an outfit for an office party. Have you considered pairing those jeans with a stylish blouse or a dressy top? It could give you a chic and sophisticated look for the party. Do you have any color preferences for the top?" 
+    Example 2 Answer:['A nice blouse in a neutral color would be great', 'A dressy top in a bold color could make a statement', 'A printed top with some embellishments would add some flair']
+    
+    Example 3 query:{example_question}
+    Example 3 Answer: ['Just Straight & Slim please', 'Bootcut', 'I need a jacket in military style to go with it']
+ 
+    ## Query:{question}
+    Answer: 
+
+
+    """
+    try:
+        response = client.completions.create(
+            model="gpt-3.5-turbo-instruct",
+            prompt=prompt,
+            max_tokens=350,
+            n=1,
+            stop=None,
+            temperature=0.1,
+        )
+        # answer = response.choices[0].text.strip()
+        # print(response)
+        answer_json_string=(response.model_dump_json(indent=2))
+        answer_dict = json.loads(answer_json_string)
+        # print(answer_dict)
+        answer = answer_dict['choices'][0]['text']
+    except Exception as e:
+        print(e)
+        answer = "I'm sorry, but I'm currently unable to process your request. Please try again later."
+    return answer

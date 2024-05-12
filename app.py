@@ -13,12 +13,13 @@ from src.google_vision import detect_labels
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit,join_room
+from threading import Thread
 
-# custom module imports
-# from src.object_segment import localize_objects
-from src.sqlite_db.db_model import db
-from src.sqlite_db.db_ops import add_or_update_session, get_session_data
-from src.google_vision import pin_image_recieved_chain
+
+from src.sqlite_db.extensions import db, migrate
+from src.sqlite_db.db_model import SessionData
+
+from src.google_vision import pin_image_received_chain,call_vision_chain
 from src.open_calls.instruction_calls import *
 from src.parser_helpers import extract_list_from_string
 
@@ -28,18 +29,16 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 db_path = os.path.join(BASE_DIR, 'src', 'sqlite_db', 'sessions.db')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db.init_app(app)
 
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Ensure the directory exists
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER  # Set the configuration in Flask
 
-
-with app.app_context():
-    db.create_all()
+db.init_app(app)
+migrate.init_app(app, db)
 
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
-socketio = SocketIO(app, cors_allowed_origins="*")  # Enable CORS for SocketIO
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 
 @app.route('/api/upload', methods=['POST'])
@@ -68,66 +67,60 @@ def fetch_pins():
     data = request.get_json()
     image_url = data.get('image')
     session_id = data.get('session_id')
-    ## save image locally in ./uploads
+
     if not image_url or not session_id:
-        print("Image URL or session ID missing")
         return jsonify({"message": "Image URL or session ID missing", "status": "error"}), 400
 
+    # Retrieve session data
+    historical_chat, historical_embeddings,historical_keyword_list = get_session_data(session_id)
+    # if not historical_chat:  # If no session found, initialize it
+    #     add_or_update_session(session_id, "Initial session start", None)
+
     try:
-        # Fetch the image from the URL
         response = requests.get(image_url)
         if response.status_code == 200:
-            # Create a secure filename
             filename = secure_filename(image_url.split('/')[-1])
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            print('saving image')
-            # Save the file
             with open(file_path, 'wb') as f:
                 f.write(response.content)
+            
+            # Process image and generate response based on historical context
+            final_dict, list_of_objects_in_crop,final_pin_list = call_vision_chain(
+                file_path,historical_keyword_list, historical_context=historical_chat, historical_embeddings=historical_embeddings
+            )
+            # print('final_dict',final_dict)
+            response = no_context_request_more_context(list_of_objects_in_crop)
+            options_placeholders = extract_list_from_string(davinci_results_sentence(response))
 
-            ##first let's identify what the historical context is by checking up the session
-            cropped_images,list_of_objects_in_crop=pin_image_recieved_chain(file_path,historical_context=None,call_retrieval=False)
-            # print(cropped_images)
-            print('\n',list_of_objects_in_crop)
-            # response=basic_shopping_prompt("",list_of_objects_in_crop,"")
-            response=no_context_request_more_context(list_of_objects_in_crop)
-            options_placeholders=davinci_results_sentence(response)
-            print('options_placeholders',options_placeholders)
-            print(type(options_placeholders))
-            options_placeholders=extract_list_from_string(options_placeholders)
-            print(type(options_placeholders))
+            # ### for random pin send testing
+            # with open('./data/products.json', 'r') as file:
+            #     products = json.load(file)
+            # product_ids = random.sample(list(products.keys()), 3)
 
-    ##if we have historical context , we send the image and the context to clotho.fashion_model for similarity understanding;
+            product_ids=final_pin_list
 
-    ##else we get sample decsriptions for the image
-    # get_textual_description()
-  
-        with open('./data/products.json', 'r') as file:
-            products = json.load(file)
+            system_default_response = "Check out these pins!"
+            default_placeholder = ['how can i decide my size', 'what else is there in a similar style']
+            if response:
+                system_default_response = response
 
-        product_ids = random.sample(list(products.keys()), 3)
+            if isinstance(options_placeholders, list):
+                default_placeholder = options_placeholders
+            
+            # Emit response to the client
+            socketio.emit('chat-response', {
+                'message': system_default_response,
+                'placeholders': default_placeholder
+            }, room=session_id)
 
-        # Here, make sure the room exists and the session_id is correct
-        system_default_response = "Check out these pins!"
-        default_placeholder=['how can i decide my size', 'what else is there in a similar style']
-        if response != None:
-            system_default_response=response
+            # Update session with new chat and embeddings
+            add_or_update_session(session_id, system_default_response,list_of_objects_in_crop, None)
 
-        if options_placeholders and isinstance(options_placeholders, list) and len(options_placeholders) > 0:
-            default_placeholder = options_placeholders
-        print('defauly placeholder',default_placeholder)
-        socketio.emit('chat-response', {
-            'message': system_default_response,
-            'placeholders': default_placeholder
-        }, room=session_id)  # Make sure this session_id is currently connected and joined to a room.
-        add_or_update_session(session_id, system_default_response, [.541231],user=False)
-        
-        return jsonify({"productIds": product_ids}), 200
+            return jsonify({"productIds": product_ids}), 200
 
     except Exception as e:
         print(e)
         return jsonify({"message": "An error occurred: " + str(e), "status": "error"}), 500
-
 
 
 @socketio.on('connect')  # Define a handler for WebSocket connections

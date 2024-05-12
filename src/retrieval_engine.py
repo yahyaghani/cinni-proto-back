@@ -22,7 +22,7 @@ def image_text_retrieval(input_query):
     name='multimodal_collection', 
     embedding_function=embedding_function, 
     data_loader=image_loader)
-    retrieved = collection.query(query_texts=input_query, include=['uris'], n_results=3)
+    retrieved = collection.query(query_texts=input_query, include=['uris'], n_results=5)
     return retrieved
 
 def image_retrieval(query_image):
@@ -38,7 +38,7 @@ def image_retrieval(query_image):
     )
 
     # Query the collection with the provided image
-    retrieved = collection.query(query_images=[query_image], include=['uris'], n_results=3)
+    retrieved = collection.query(query_images=[query_image], n_results=5)
     return retrieved
 
 

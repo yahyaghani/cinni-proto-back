@@ -98,7 +98,7 @@ def process_images_and_map_uris(cropped_images, actual_list):
         if item_name in cropped_images:
             # Perform image retrieval for the current cropped image
             resulting_dict = image_retrieval(cropped_images[item_name])
-
+    
             # Extract URIs from the resulting_dict and assign them to the final_dict
             if resulting_dict and 'uris' in resulting_dict:
                 # Flatten the list of URIs if they are nested
@@ -111,37 +111,76 @@ def process_images_and_map_uris(cropped_images, actual_list):
 
 
 
+def process_images_and_map_ids(cropped_images, actual_list):
+    """
+    Process each cropped image, retrieve corresponding image IDs from results,
+    and map them to the respective clothing items in the actual_list based on
+    a distance threshold.
+
+    Parameters:
+    cropped_images: Dictionary of cropped images with keys from actual_list.
+    actual_list: List of clothing item names.
+
+    Returns:
+    final_dict: Dictionary mapping each clothing item to a list of image IDs where distance > 0.5.
+    """
+    final_dict = {}
+    index = 0  # To keep track of the corresponding item in actual_list
+
+    # Iterate over each cropped image and its associated item name
+    for item_name in actual_list:
+        if item_name in cropped_images:
+            # Perform image retrieval for the current cropped image
+            # print('croppedimages[item_name]', cropped_images[item_name])
+            resulting_dict = image_retrieval(cropped_images[item_name])
+            # print('resulting_dict', resulting_dict)
+
+            # Extract and filter IDs based on distances
+            if resulting_dict and 'ids' in resulting_dict and 'distances' in resulting_dict:
+                ids = resulting_dict['ids']
+                distances = resulting_dict['distances']
+                filtered_ids = []
+
+                for id_list, distance_list in zip(ids, distances):
+                    for id, distance in zip(id_list, distance_list):
+                        if distance > 0.3:
+                            filtered_ids.append(id)
+                    
+                final_dict[item_name] = filtered_ids
+                print(f'Filtered IDs for {item_name}:', filtered_ids)
+
+        index += 1  # Move to the next item in the list
+
+    return final_dict
+
+
+
 # image_path="/home/taymur/Downloads/loose_twill_jacket_men_hnm-ezgif.com-webp-to-jpg-converter.jpg"
 # historical_context='brothers wedding ceremony'
 # # Example usage:
 
 
-def call_vision_chain(image_path,historical_context=None,call_retrieval=True):
-    if historical_context==None:
-        historical_context=""
+def call_vision_chain(image_path, historical_keyword_list,historical_context=None, historical_embeddings=False, call_retrieval=True):
+    if historical_context is None:
+        historical_context = historical_keyword_list
+    
+    # Detect objects and crop images based on these objects
     objects_info = localize_objects(image_path)
-    print(objects_info)
     detected_element_names = list(objects_info.keys())
+    cropped_images = crop_objects(image_path, objects_info, detected_element_names)  # Assume this returns a dict of image data
     print(detected_element_names)
-    list_of_objects_to_crop=identify_labels_to_crop(detected_element_names,historical_context)
-    print(list_of_objects_to_crop)
-    print(type(list_of_objects_to_crop))
-    if type(list_of_objects_to_crop)==str:
-        list_of_objects_to_crop = ast.literal_eval(list_of_objects_to_crop)
-        print('changed type using ast')
-        print(list_of_objects_to_crop)
-        print(type(list_of_objects_to_crop))
+    # Process the cropped images and map them to IDs with filtering logic
+    final_dict = process_images_and_map_ids(cropped_images, detected_element_names)
+    # print(final_dict)
 
-    # print(cropped_image)
-    cropped_images = crop_objects(image_path, objects_info, list_of_objects_to_crop)  # Assume this returns a dict of image data
-    if call_retrieval==False:
-        return cropped_images,list_of_objects_to_crop
-    final_dict = process_images_and_map_uris(cropped_images, list_of_objects_to_crop)
-    print(final_dict)
-    return final_dict
+    # Extract all values from final_dict and flatten them into a single list
+    final_pin_list = [item_id for sublist in final_dict.values() for item_id in sublist]
+    # print("Final pin list:", final_pin_list)
+
+    return final_dict, detected_element_names, final_pin_list
 
 
-def pin_image_recieved_chain(image_path,historical_context=None,call_retrieval=True):
+def pin_image_received_chain(image_path,historical_context=None,call_retrieval=True):
     if historical_context==None:
         historical_context=""
     objects_info = localize_objects(image_path)
@@ -162,7 +201,7 @@ def pin_image_recieved_chain(image_path,historical_context=None,call_retrieval=T
     cropped_images = crop_objects(image_path, objects_info, detected_element_names)  # Assume this returns a dict of image data
     if call_retrieval==False:
         return cropped_images,detected_element_names
-    final_dict = process_images_and_map_uris(cropped_images, detected_element_names)
+    final_dict = process_images_and_map_ids(cropped_images, detected_element_names)
     print(final_dict)
     return final_dict
 

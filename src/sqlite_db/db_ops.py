@@ -9,37 +9,35 @@ from flask import Flask
 # with app.app_context():
 #     db.create_all()
 
-def add_or_update_session(session_id, new_chat, new_embedding, user=False):
+
+
+def add_or_update_session(session_id, new_chat, keywords, new_embedding, user=False):
     session = SessionData.query.filter_by(session_id=session_id).first()
-    # Decide the prefix based on who is speaking
     prefix = "User: " if user else "Cinni AI: "
-    # Format the chat with the appropriate prefix
     formatted_chat = f"{prefix}{new_chat}"
 
     if session:
-        # Append formatted chat to the existing string with a newline for separation
+        # Append formatted chat and keywords to the existing session
         session.historical_chat += f"\n{formatted_chat}"
+        if keywords:
+            session.keywords.extend(keywords)  # Append new keywords to the existing list
     else:
-        # If the session does not exist, create a new one with a default message
+        # If the session does not exist, create a new one
         initial_message = "Cinni AI: Hey, what's the special occasion we are looking to dress for..."
         formatted_chat = f"{initial_message}\n{formatted_chat}"
-
-        # Create the session with the initial message and the new chat
         embeddings = [new_embedding] if new_embedding is not None else []
-        session = SessionData(session_id, formatted_chat, embeddings)
-        print(formatted_chat)
-        db.session.add(session)
+        session = SessionData(session_id, formatted_chat, embeddings, keywords)
 
-    # Add new embedding if not None
-    if new_embedding is not None and session:
+    # Add new embedding if provided
+    if new_embedding is not None:
         session.historical_embeddings.append(new_embedding)
-        print(formatted_chat)
+
     db.session.commit()
 
 def get_session_data(session_id):
     session = SessionData.query.filter_by(session_id=session_id).first()
     if session:
-        return session.historical_chat, session.historical_embeddings
+        return session.historical_chat, session.historical_embeddings,session.keywords
     return None, None
 
 # # Example usage

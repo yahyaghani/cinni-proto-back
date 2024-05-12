@@ -3,8 +3,10 @@
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit,join_room
 import uuid
+import json
+import random
 
 import os
 from werkzeug.utils import secure_filename
@@ -62,23 +64,34 @@ def fetch_pins():
     image_url = data.get('image')
     session_id = data.get('session_id')
 
-    if image_url:
-        # Process the image URL as needed, here just simulating
-        # Mock response URLs for new pins
-        new_pins_urls = [
-            "https://storage.yandexcloud.net/clothes-and-wildberries/clothes-parsing-dataset/shein/2023/01/11/167340049193f732321fe3276a6cdf15eec222516e_thumbnail_600x.webp",
-            "https://storage.yandexcloud.net/clothes-and-wildberries/clothes-parsing-dataset/shein/2020/12/04/1607063823f37b13da36d7899a3d85804fbe0a6190_thumbnail_600x.webp",
-            "https://storage.yandexcloud.net/clothes-and-wildberries/clothes-parsing-dataset/shein/2022/09/14/16631405446974d94a00df821f0a7f48a4c1e33b31_thumbnail_600x.webp"
-        ]
-        return jsonify({"urls": new_pins_urls})
-    else:
-        return jsonify({"message": "No image URL provided", "status": "error"})
+    if not image_url or not session_id:
+        return jsonify({"message": "Image URL or session ID missing", "status": "error"}), 400
+
+    try:
+        with open('./data/products.json', 'r') as file:
+            products = json.load(file)
+
+        product_ids = random.sample(list(products.keys()), 3)
+
+        # Here, make sure the room exists and the session_id is correct
+        system_default_response = "Check out these pins!"
+        socketio.emit('chat-response', {
+            'message': system_default_response,
+            'placeholders': ['how can i decide my size', 'what else is there in a similar style']
+        }, room=session_id)  # Make sure this session_id is currently connected and joined to a room.
+        add_or_update_session(session_id, system_default_response, [.541231],user=False)
+
+        return jsonify({"productIds": product_ids}), 200
+
+    except Exception as e:
+        return jsonify({"message": "An error occurred: " + str(e), "status": "error"}), 500
 
 
 
 @socketio.on('connect')  # Define a handler for WebSocket connections
 def handle_connect():
     session_id = str(uuid.uuid4())  # Generate a unique session ID
+    join_room(session_id)  # The client joins a room named after their session ID.
     emit('session_id', {'session_id': session_id})  # Emit the session ID back to the client
     print('Client connected with session ID:', session_id)
 
@@ -94,15 +107,17 @@ def handle_chat_query(data):
     message = data.get('message')
     print('Received message from session:', session_id, 'Message:', message)
     add_or_update_session(session_id, message, None,user=True)
-
-
     ## we need to parse the query and store it in a table utilising the session id for key, aswell as continue with other processes
      
     # # You can emit a response back to the client if required
     ## Finaly store the embeddings and system response
-    # add_or_update_session(session_id, system_answer, new_embedding,user=False)
+    system_default_response="Response to chat query"
+    add_or_update_session(session_id, system_default_response, [0.14241412441],user=False)
+    if session_id:
+        emit('chat-response', {'message': system_default_response,'placeholders':['how can i decide my size', 'what else is there in a similar style']}, room=session_id)  # Emit a response to the client
 
-    emit('chat-response', {'message': 'Response to chat query','placeholders':'how can i decide my size,what else is there in a similar style'})  # Emit a response to the client
+
+
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=5000)

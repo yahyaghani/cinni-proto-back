@@ -12,19 +12,28 @@ from flask import Flask
 def add_or_update_session(session_id, new_chat, new_embedding, user=False):
     session = SessionData.query.filter_by(session_id=session_id).first()
     # Decide the prefix based on who is speaking
-    prefix = "User's Question: " if user else "Cinni AI Answer: "
+    prefix = "User: " if user else "Cinni AI: "
     # Format the chat with the appropriate prefix
     formatted_chat = f"{prefix}{new_chat}"
+
     if session:
         # Append formatted chat to the existing string with a newline for separation
         session.historical_chat += f"\n{formatted_chat}"
-        if new_embedding is not None:
-            session.historical_embeddings.append(new_embedding)  # Only append if not None
     else:
-        # If the session does not exist, create a new one
+        # If the session does not exist, create a new one with a default message
+        initial_message = "Cinni AI: Hey, what's the special occasion we are looking to dress for..."
+        formatted_chat = f"{initial_message}\n{formatted_chat}"
+
+        # Create the session with the initial message and the new chat
         embeddings = [new_embedding] if new_embedding is not None else []
         session = SessionData(session_id, formatted_chat, embeddings)
+        print(formatted_chat)
         db.session.add(session)
+
+    # Add new embedding if not None
+    if new_embedding is not None and session:
+        session.historical_embeddings.append(new_embedding)
+        print(formatted_chat)
     db.session.commit()
 
 def get_session_data(session_id):

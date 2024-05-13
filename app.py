@@ -40,7 +40,11 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER  # Set the configuration in Flask
 db.init_app(app)
 migrate.init_app(app, db)
 
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+# CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+##Cloud version
+CORS(app, resources={r"/api/*": {"origins": "https://cinni.yahyaghani.com"}})
+
+
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 
@@ -68,6 +72,7 @@ def upload_image():
 @app.route('/api/fetch-pins', methods=['POST'])
 def fetch_pins():
     data = request.get_json()
+    print('fetch api data',data)
     image_url = data.get('image')
     session_id = data.get('session_id')
 
@@ -185,4 +190,5 @@ def handle_chat_query(data):
 
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, port=5000)
+    # socketio.run(app, debug=True, port=5000)
+    socketio.run(app, host='localhost', debug=True)

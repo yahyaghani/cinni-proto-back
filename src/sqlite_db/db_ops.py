@@ -13,7 +13,7 @@ from flask import Flask
 
 def add_or_update_session(session_id, new_chat, keywords, new_embedding, user=False):
     session = SessionData.query.filter_by(session_id=session_id).first()
-    prefix = "User: " if user else "Cinni AI: "
+    prefix = "" if user else "Cinni AI: "
     formatted_chat = f"{prefix}{new_chat}"
 
     if session:
@@ -38,7 +38,7 @@ def get_session_data(session_id):
     session = SessionData.query.filter_by(session_id=session_id).first()
     if session:
         return session.historical_chat, session.historical_embeddings,session.keywords
-    return None, None
+    return None, None,None
 
 # # Example usage
 # if __name__ == '__main__':

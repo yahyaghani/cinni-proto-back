@@ -18,8 +18,11 @@ from threading import Thread
 
 from src.sqlite_db.extensions import db, migrate
 from src.sqlite_db.db_model import SessionData
+from src.sqlite_db.db_ops import add_or_update_session,get_session_data
 
-from src.google_vision import pin_image_received_chain,call_vision_chain
+
+
+from src.google_vision import pin_image_received_chain,call_vision_chain,call_chat_chain
 from src.open_calls.instruction_calls import *
 from src.parser_helpers import extract_list_from_string
 
@@ -73,8 +76,8 @@ def fetch_pins():
 
     # Retrieve session data
     historical_chat, historical_embeddings,historical_keyword_list = get_session_data(session_id)
-    # if not historical_chat:  # If no session found, initialize it
-    #     add_or_update_session(session_id, "Initial session start", None)
+    # Determine if this is the first interaction based on historical_chat
+    is_first_interaction = not historical_chat
 
     try:
         response = requests.get(image_url)
@@ -85,18 +88,20 @@ def fetch_pins():
                 f.write(response.content)
             
             # Process image and generate response based on historical context
-            final_dict, list_of_objects_in_crop,final_pin_list = call_vision_chain(
-                file_path,historical_keyword_list, historical_context=historical_chat, historical_embeddings=historical_embeddings
-            )
+            final_dict, list_of_objects_in_crop, final_pin_list = call_vision_chain(
+                            file_path,
+                            historical_keyword_list,
+                            historical_context=historical_chat,
+                            historical_embeddings=historical_embeddings,
+                            First=is_first_interaction
+                                )
+
             # print('final_dict',final_dict)
             response = no_context_request_more_context(list_of_objects_in_crop)
-            options_placeholders = extract_list_from_string(davinci_results_sentence(response))
-
-            # ### for random pin send testing
-            # with open('./data/products.json', 'r') as file:
-            #     products = json.load(file)
-            # product_ids = random.sample(list(products.keys()), 3)
-
+            options_placeholders = davinci_results_sentence(response)
+            options_placeholders = extract_list_from_string(options_placeholders)
+            print('options_placeholders',options_placeholders)
+            print(type(options_placeholders))
             product_ids=final_pin_list
 
             system_default_response = "Check out these pins!"
@@ -136,22 +141,47 @@ def handle_connect():
 def handle_disconnect():
     print('Client disconnected')
 
-@socketio.on('chat-query')  # Define a handler for chat queries
+@socketio.on('chat-query')
 def handle_chat_query(data):
+    print("Received data from chat-query:", data)
     session_id = data.get('session_id')
     message = data.get('message')
     print('Received message from session:', session_id, 'Message:', message)
-    add_or_update_session(session_id, message, None,user=True)
-    ## we need to parse the query and store it in a table utilising the session id for key, aswell as continue with other processes
-     
-    # # You can emit a response back to the client if required
-    ## Finaly store the embeddings and system response
-    system_default_response="Response to chat query"
-    add_or_update_session(session_id, system_default_response, [0.14241412441],user=False)
-    if session_id:
-        emit('chat-response', {'message': system_default_response,'placeholders':['how can i decide my size', 'what else is there in a similar style']}, room=session_id)  # Emit a response to the client
 
+    historical_chat, historical_embeddings, historical_keyword_list = get_session_data(session_id)
+    is_first_interaction = not historical_chat
+    print("Session data retrieved, is first interaction:", is_first_interaction)
 
+    try:
+        response_35, response_instruct, final_dict, final_pin_list = call_chat_chain(
+            message,
+            historical_keyword_list,
+            historical_chat,
+            historical_embeddings,
+            is_first_interaction
+        )
+        print(f"Chat chain processed: {response_35}, {response_instruct}")
+        system_default_response = response_35 or "Thank you for your message!"
+        default_placeholder = response_instruct or ['how can i decide my size', 'what else is there in a similar style']
+
+        emit('chat-response', {
+            'message': system_default_response,
+            'placeholders': default_placeholder
+        }, room=session_id)
+        # print(f"Response emitted, session updated with: {system_default_response}, {default_placeholder}")
+
+        chat_history_update=f"\nUser:{message}\nCinni AI:{default_placeholder}"
+        add_or_update_session(session_id, chat_history_update, response_instruct, None, user=True)
+        print('updated history db',chat_history_update)
+        if final_dict:
+            emit('new-pins', {
+                'pins': final_pin_list
+            }, room=session_id)
+            print("Emitting new pins:", final_pin_list)
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        emit('error', {'message': str(e)}, room=session_id)
 
 
 if __name__ == '__main__':

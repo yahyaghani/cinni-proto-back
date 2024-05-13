@@ -318,3 +318,49 @@ def davinci_results_sentence(question):
         print(e)
         answer = "I'm sorry, but I'm currently unable to process your request. Please try again later."
     return answer
+
+
+def chat_question_no_keywords_no_history(question):
+    prompt=f"""
+    You are a shopping assistant, you have to identify and answer the users query to help them in their shopping journey:
+    
+    here are some examples of your thought process :-
+
+    Example 1 question: {example_query_2}
+    Answer: {example_keyword_list_2}
+
+    Example 2 query: {example_query_3}
+    Answer: {example_keyword_list_3}
+
+    New query :{question}
+    Answer:
+"""
+    try:
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo-16k",
+            # model="gpt-4",
+
+            messages=[
+                {
+                    "role": "system",
+                    "content": f"You are a helpful Shopping Assistant, called Cinni AI, your goal is to converse with the user to delve into their shopping queries to ask leading questions that can help identify what style,color,size,occasion,materials they prefer. You utilise your previous history with the user to understand and shape their shopping journey.."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            max_tokens=500,
+            n=1,
+            temperature=0.15,  
+        )
+        # answer = response.choices[0].message['content'].strip()
+        answer_json_string=(response.model_dump_json(indent=2))
+        answer_dict = json.loads(answer_json_string)
+        answer = answer_dict['choices'][0]['message']['content']
+
+    except Exception as e:
+        answer = "None"
+        print(e)
+
+    return answer

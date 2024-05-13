@@ -5,9 +5,9 @@ import numpy as np
 import ast 
 ##
 
-from src.open_calls.instruction_calls import identify_labels_to_crop
-from src.retrieval_engine import image_retrieval
-
+from src.open_calls.instruction_calls import davinci_results_sentence,chat_question_no_keywords_no_history,basic_shopping_prompt
+from src.retrieval_engine import image_retrieval,image_text_retrieval
+from src.parser_helpers import extract_list_from_string
 
 def localize_objects(path):
     """Localizes objects in a given image and returns a dictionary with the details."""
@@ -115,7 +115,8 @@ def process_images_and_map_ids(cropped_images, actual_list):
     """
     Process each cropped image, retrieve corresponding image IDs from results,
     and map them to the respective clothing items in the actual_list based on
-    a distance threshold.
+    a distance threshold. Scale the number of results retrieved based on the
+    number of items to ensure efficient processing.
 
     Parameters:
     cropped_images: Dictionary of cropped images with keys from actual_list.
@@ -125,50 +126,47 @@ def process_images_and_map_ids(cropped_images, actual_list):
     final_dict: Dictionary mapping each clothing item to a list of image IDs where distance > 0.5.
     """
     final_dict = {}
-    index = 0  # To keep track of the corresponding item in actual_list
+    num_cropped_images = len(cropped_images)
 
-    # Iterate over each cropped image and its associated item name
+    # Calculate the number of results to retrieve for each image retrieval
+    max_total_results = 8  # Approximate maximum total results we want to handle
+    results_per_image = max(1, max_total_results // max(num_cropped_images, 1))
+
     for item_name in actual_list:
         if item_name in cropped_images:
-            # Perform image retrieval for the current cropped image
-            # print('croppedimages[item_name]', cropped_images[item_name])
-            resulting_dict = image_retrieval(cropped_images[item_name])
-            # print('resulting_dict', resulting_dict)
+            # Adjust the retrieval to fetch an appropriate number of results
+            resulting_dict = image_retrieval(cropped_images[item_name], results_per_image)
+            filtered_ids = []
 
-            # Extract and filter IDs based on distances
             if resulting_dict and 'ids' in resulting_dict and 'distances' in resulting_dict:
-                ids = resulting_dict['ids']
-                distances = resulting_dict['distances']
-                filtered_ids = []
-
-                for id_list, distance_list in zip(ids, distances):
-                    for id, distance in zip(id_list, distance_list):
-                        if distance > 0.3:
-                            filtered_ids.append(id)
-                    
-                final_dict[item_name] = filtered_ids
-                print(f'Filtered IDs for {item_name}:', filtered_ids)
-
-        index += 1  # Move to the next item in the list
+                for id_list, distance_list in zip(resulting_dict['ids'], resulting_dict['distances']):
+                    filtered_ids.extend([id for id, distance in zip(id_list, distance_list) if distance > 0.3])
+            
+            final_dict[item_name] = filtered_ids
+            print(f'Filtered IDs for {item_name}:', filtered_ids)
 
     return final_dict
-
-
 
 # image_path="/home/taymur/Downloads/loose_twill_jacket_men_hnm-ezgif.com-webp-to-jpg-converter.jpg"
 # historical_context='brothers wedding ceremony'
 # # Example usage:
 
 
-def call_vision_chain(image_path, historical_keyword_list,historical_context=None, historical_embeddings=False, call_retrieval=True):
+def call_vision_chain(image_path, historical_keyword_list, historical_context=None, historical_embeddings=False, call_retrieval=True, First=False):
     if historical_context is None:
         historical_context = historical_keyword_list
     
     # Detect objects and crop images based on these objects
     objects_info = localize_objects(image_path)
     detected_element_names = list(objects_info.keys())
+    
+    # Remove 'Person' from the detected elements if there are other elements present
+    if len(detected_element_names) > 1 and 'Person' in detected_element_names:
+        detected_element_names.remove('Person')
+
     cropped_images = crop_objects(image_path, objects_info, detected_element_names)  # Assume this returns a dict of image data
     print(detected_element_names)
+    
     # Process the cropped images and map them to IDs with filtering logic
     final_dict = process_images_and_map_ids(cropped_images, detected_element_names)
     # print(final_dict)
@@ -205,3 +203,46 @@ def pin_image_received_chain(image_path,historical_context=None,call_retrieval=T
     print(final_dict)
     return final_dict
 
+
+def call_chat_chain(message, historical_keyword_list, historical_chat, historical_embeddings, is_first_interaction):
+    print("Starting call_chat_chain...")
+    if is_first_interaction:
+        response_35 = chat_question_no_keywords_no_history(message)
+        print(f"First interaction: {response_35}")
+
+        response_instruct = davinci_results_sentence(message)
+        print(f"First interaction: Instructions: {response_instruct}")
+    else:
+        response_35 = basic_shopping_prompt(message, historical_keyword_list, historical_chat)
+        print(f"Subsequent interaction: {response_35}")
+
+        response_instruct = davinci_results_sentence(message)
+        print(f"Subsequent interaction: Instructions: {response_instruct}")
+
+    # Ensure response_instruct is a list
+    if not isinstance(response_instruct, list):
+        response_instruct=extract_list_from_string(response_instruct)
+        # response_instruct = [response_instruct]  # Convert to list if not already
+        print(f"Converted response_instruct to list: {response_instruct}")
+
+    max_total_results = 8
+    num_responses = len(response_instruct)
+    results_per_response = max(1, max_total_results // max(num_responses, 1))
+    print(f"Calculated number of results per response: {results_per_response}")
+
+    final_dict = {}
+    for instruction in response_instruct:
+        print(f"Retrieving images for instruction: {instruction}")
+        image_results = image_text_retrieval(instruction, results_per_response)
+        print('image_results in chat chain',image_results)
+        filtered_ids = []
+        if image_results and 'ids' in image_results and 'distances' in image_results:
+            for id_list, distance_list in zip(image_results['ids'], image_results['distances']):
+                filtered_ids.extend([id for id, distance in zip(id_list, distance_list) if distance > 0.3])
+        final_dict[instruction] = filtered_ids
+        print(f"Filtered IDs for {instruction}: {filtered_ids}")
+
+    final_pin_list = [item_id for sublist in final_dict.values() for item_id in sublist]
+    print("Final pin list compiled:", final_pin_list)
+
+    return response_35, response_instruct, final_dict, final_pin_list

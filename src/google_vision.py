@@ -225,7 +225,7 @@ def call_chat_chain(message, historical_keyword_list, historical_chat, historica
         # response_instruct = [response_instruct]  # Convert to list if not already
         print(f"Converted response_instruct to list: {response_instruct}")
 
-    max_total_results = 8
+    max_total_results = 5
     num_responses = len(response_instruct)
     results_per_response = max(1, max_total_results // max(num_responses, 1))
     print(f"Calculated number of results per response: {results_per_response}")

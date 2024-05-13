@@ -1,0 +1,286 @@
+    1  wget https://repo.anaconda.com/archive/Anaconda3-2020.07-Linux-x86_64.sh
+    2  chmod +x Anaconda3-2020.07-Linux-x86_64.sh
+    3  ./Anaconda3-2020.07-Linux-x86_64.sh
+    4  eval "$(/home/taymur/anaconda3/bin/conda shell.YOUR_SHELL_NAME hook)" 
+    5  eval "$(/home/taymur/anaconda3/bin/conda shell.Bash hook)" 
+    6  eval "$(/home/taymur/anaconda3/bin/conda shell.Bbsh hook)" 
+    7  eval "$(/home/taymur/anaconda3/bin/conda shell.bassh hook)" 
+    8  eval "$(/home/taymur/anaconda3/bin/conda shell.bash hook)" 
+    9  conda create -n python=3.10
+   10  conda activate cinni
+   11  conda env remove --name python=3.10
+   12  conda create -n cinni python=3.10
+   13  ssh-keygen -t ed25519 -C "yambox88@gmail.com"
+   14  ls
+   15  ssh-keygen -t rsa -b 4096 -C "yambox88@gmail.com"
+   16  eval "$(ssh-agent -s)"
+   17  ls
+   18  ssh-add ~/.ssh/github_rsa
+   19  ssh-add github_rsa
+   20  sudo apt-get install xclip
+   21  xclip -selection clipboard < github_rsa
+   22  xclip -selection clipboard < github_rsa.pub
+   23  cat github_rsa.pub
+   24  ssh -T git@github.com
+   25  git clone https://github.com/yahyaghani/cinni-proto-back backend
+   26  git clone https://github.com/yahyaghani/cinni-proto-front frontend
+   27  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+   28  wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+   29  source ~/.bashrc
+   30  history | grep eval
+   31  eval "$(/home/taymur/anaconda3/bin/conda shell.bash hook)" 
+   32  nvm install 18
+   33  nvm use 18
+   34  nvm alias default 18
+   35  node -v
+   36  cd frontend
+   37  ls
+   38  yarn install
+   39  sudo apt install cmdtest
+   40  yarn install
+   41  ls
+   42  nvm use 8
+   43  nvm use 18
+   44  yarn install
+   45  yarn --version
+   46  npm install --global yarn
+   47  curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+   48  echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+   49  sudo apt update && sudo apt install yarn
+   50  yarn install
+   51  ls
+   52  code src/App.js
+   53  conda activate cinni
+   54  export OPENAI_API_KEY="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"
+   55  export GOOGLE_API_KEY="AIzaSyBxjxWrdhBtRf-YUfdm5PzXeANjOvlh4zs"
+   56  pwd
+   57  export PYTHONPATH=/home/taymur/backend
+   58  yarn build
+   59  nano .env
+   60  cd ..
+   61  cd backend
+   62  ls
+   63  source ~/.bashrc
+   64  history | grep eval
+   65  eval "$(/home/taymur/anaconda3/bin/conda shell.bash hook)" 
+   66  pip install -r requirements.txt
+   67  code requirements.txt
+   68  pip install -r requirements.txt
+   69  git pull
+   70  pip install -r requirements.txt
+   71  git stash && git pull
+   72  pip install -r requirements.txt
+   73  python --version
+   74  conda activate cinni
+   75  python --version
+   76  pip install -r requirements.txt
+   77  git pull
+   78  pip install -r requirements.txt
+   79  sudo apt-get install build-essential
+   80  pip install annoy
+   81  pip install -r requirements.txt
+   82  sudo apt install nginx
+   83  sudo nano /etc/nginx/sites-available/cinni.yahyaghani.com
+   84  sudo ln -s /etc/nginx/sites-available/cinni.yahyaghani.com /etc/nginx/sites-enabled/
+   85  sudo nginx -t
+   86  sudo systemctl reload nginx
+   87  sudo ufw allow 'Nginx Full'
+   88  sudo apt install certbot python3-certbot-nginx
+   89  sudo certbot --nginx -d cinni.yahyaghani.com
+   90  ls
+   91  code app.py
+   92  sudo nano /etc/nginx/sites-available/cinni.yahyaghani.com
+   93  code /etc/nginx/sites-available/cinni.yahyaghani.com
+   94  rm -rf /etc/nginx/sites-available/cinni.yahyaghani.com
+   95  sudo mv /etc/nginx/sites-available/cinni.yahyaghani.com /etc/nginx/sites-available/cinni_backup
+   96  sudo nano /etc/nginx/sites-available/cinni.yahyaghani.com
+   97  yarn build
+   98  code /etc/nginx/sites-available/cinni.yahyaghani.com
+   99  yarn build
+  100  serve -s build
+  101  yarn serve -s build
+  102  yarn serve build
+  103  npm install -g serve
+  104  serve -s build
+  105  yarn build
+  106  sudo mv /etc/nginx/sites-available/cinni.yahyaghani.com /etc/nginx/sites-available/cinni_backup_2
+  107  sudo nano /etc/nginx/sites-available/cinni.yahyaghani.com
+  108  curl http://localhost:5000
+  109  curl https://localhost:5000
+  110  serve -s build
+  111  sudo pkill -9 node
+  112  history | grep eval
+  113  eval "$(/home/taymur/anaconda3/bin/conda shell.bash hook)"
+  114  conda activate cinni
+  115  gcloud login
+  116  gcloud auth login
+  117  cd ..
+  118  mkdir imp
+  119  code imp/credentials.json
+  120  pwd
+  121  cd imp
+  122  pwd
+  123  export GOOGLE_APPLICATION_CREDENTIALS="/home/taymur/imp/credentials.json"
+  124  code imp/credentials.jsonecho $GOOGLE_APPLICATION_CREDENTIALS
+  125  echo $GOOGLE_APPLICATION_CREDENTIALS
+  126  history | grep eval
+  127  eval "$(/home/taymur/anaconda3/bin/conda shell.bash hook)" 
+  128  history | grep export
+  129  export OPENAI_API_KEY="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"
+  130  export GOOGLE_API_KEY="AIzaSyBxjxWrdhBtRf-YUfdm5PzXeANjOvlh4zs"
+  131  which python
+  132  conda activate cinni
+  133  export OPENAI_API_KEY="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"
+  134  export GOOGLE_API_KEY="AIzaSyBxjxWrdhBtRf-YUfdm5PzXeANjOvlh4zs"
+  135  export FLASK_APP="app.py"
+  136  python app.py
+  137  sudo lsof -i :5000
+  138  sudo pkill -9 pt_main_t
+  139  sudo lsof -i :5000
+  140  /home/taymur/anaconda3/envs/cinni/bin/gunicorn -b localhost:5000 --pythonpath /home/taymur/backend app:app
+  141  sudo lsof -i :5000
+  142  sudo pkill -9 pt_main_t
+  143  /home/taymur/anaconda3/envs/cinni/bin/gunicorn -b localhost:5000 --pythonpath /home/taymur/backend app:app
+  144  /home/taymur/anaconda3/envs/cinni/bin/gunicorn -b localhost:80 --pythonpath /home/taymur/backend app:app
+  145  /home/taymur/anaconda3/envs/cinni/bin/gunicorn -b localhost:5000 --pythonpath /home/taymur/backend app:app
+  146  sudo pkill -9 pt_main_t
+  147  /home/taymur/anaconda3/envs/cinni/bin/gunicorn -b localhost:5000 --pythonpath /home/taymur/backend app:app
+  148  /home/taymur/anaconda3/envs/cinni/bin/gunicorn -b --pythonpath /home/taymur/backend app:app
+  149  history | grep gunicorn
+  150  /home/taymur/anaconda3/envs/cinni/bin/gunicorn -b --pythonpath /home/taymur/backend app:app
+  151  /home/taymur/anaconda3/envs/cinni/bin/gunicorn -b localhost:5000 --pythonpath /home/taymur/backend app:app
+  152  sudo pkill -9 pt_main_t
+  153  sudo service nginx restart
+  154  /home/taymur/anaconda3/envs/cinni/bin/gunicorn -b localhost:5000 --pythonpath /home/taymur/backend app:app
+  155  python app.py
+  156  sudo lsof -i :5000
+  157  sudo pkill -9 gunicorn
+  158  python app.py
+  159  sudo lsof -i :5000
+  160  sudo pkill -9 pt_main_t
+  161  sudo lsof -i :5000
+  162  python app.py
+  163  serve -s build
+  164  sudo lsof -i :3000
+  165  yarn build
+  166  serve -s build
+  167  history | grep eval
+  168  eval "$(/home/taymur/anaconda3/bin/conda shell.bash hook)" 
+  169  ls
+  170  serve -s build
+  171  sudo lsof -i :3000
+  172  sudo kill -9 2256
+  173  serve -s build &
+  174  history | grep eval
+  175  eval "$(/home/taymur/anaconda3/bin/conda shell.bash hook)" 
+  176  history | grep echo
+  177  echo $GOOGLE_APPLICATION_CREDENTIALS
+  178  history | grep google
+  179  echo $PYTHONAPP
+  180  history | grep export
+  181  export GOOGLE_API_KEY="AIzaSyBxjxWrdhBtRf-YUfdm5PzXeANjOvlh4zs"
+  182  export OPENAI_API_KEY="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"
+  183  export FLASK_APP="app.py"
+  184  conda activate cinni
+  185  echo FLASK_APP
+  186  echo $FLASK_APP
+  187  nohup python app.py > /dev/null 2>&1 &
+  188  sudo nano /etc/systemd/system/flask_app.service
+  189  sudo systemctl daemon-reload
+  190  sudo systemctl start flask_app
+  191  sudo systemctl enable flask_app
+  192  sudo systemctl status flask_app
+  193  /usr/bin/python3 /home/taymur/backend/app.py
+  194  which python
+  195  /home/taymur/anaconda3/envs/cinni/bin/python /home/taymur/backend/app.py
+  196  sudo lsof -i :5000
+  197  sudo pkill -9 pt_main_t
+  198  history | grep nano
+  199  sudo nano /etc/systemd/system/flask_app.service
+  200  code /etc/systemd/system/flask_app.service
+  201  sudo mv /etc/systemd/system/flask_app.service /etc/systemd/system/flask_app.service_backup
+  202  sudo nano /etc/systemd/system/flask_app.service
+  203  sudo systemctl enable flask_app
+  204  sudo systemctl status flask_app
+  205  cd /var/log/
+  206  ls
+  207  ls -ltrh
+  208  nano auth.log
+  209  /usr/bin/python3 /home/taymur/backend/app.py
+  210  sudo nano /etc/systemd/system/flask_app.service
+  211  sudo systemctl daemon-reload
+  212  sudo systemctl start flask_app
+  213  sudo systemctl status flask_app
+  214  sudo systemctl enable flask_app
+  215  sudo journalctl -u flask_app -f
+  216  history | grep export
+  217  export OPENAI_API_KEY="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"
+  218  sudo systemctl daemon-reload
+  219  sudo systemctl enable flask_app
+  220  sudo journalctl -u flask_app -f
+  221  sudo systemctl restart flask_app
+  222  sudo journalctl -u flask_app -f
+  223  history | grep export
+  224  sudo mv /etc/systemd/system/flask_app.service /etc/systemd/system/flask_app.service_backup
+  225  sudo nano /etc/systemd/system/flask_app.service
+  226  sudo systemctl daemon-reload
+  227  sudo systemctl restart flask_app
+  228  sudo journalctl -u flask_app -f
+  229  pip install eventlet
+  230  pip install gevent
+  231  history | grep guni
+  232  gunicorn -k eventlet -w 1 -b localhost:5000 --pythonpath /home/taymur/backend app:app
+  233  sudo lsof -i :5000
+  234  sudo kill 21297
+  235  sudo lsof -i :5000
+  236  gunicorn -k eventlet -w 1 -b localhost:5000 --pythonpath /home/taymur/backend app:app
+  237  sudo chown -R $USER:$USER test/
+  238  cd /home/taymur/backend
+  239  sudo chown -R $USER:$USER /
+  240  sudo chown -R $USER:$USER /home/taymur/backend/
+  241  chown root:root /usr/lib/sudo/sudoers.so
+  242  sudo chown root:root /usr/lib/sudo/sudoers.so
+  243  chmod 644 /usr/lib/sudo/sudoers.so
+  244  chown root:root /usr/lib/sudo/sudoers.so
+  245  chown root:root /etc/sudoers
+  246  chmod 440 /etc/sudoers
+  247  chown root:root /etc/sudoers.d
+  248  chmod 755 /etc/sudoers.d
+  249  sudo whoami
+  250  history | grep eval
+  251  eval "$(/home/taymur/anaconda3/bin/conda shell.bash hook)" 
+  252  conda activate cinni
+  253  python app.py
+  254  history | grep export
+  255  export OPENAI_API_KEY="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"
+  256  export GOOGLE_API_KEY="AIzaSyBxjxWrdhBtRf-YUfdm5PzXeANjOvlh4zs"
+  257  export FLASK_APP="app.py"
+  258  git add .
+  259  git commit -m "cloud-version"
+  260  git auth login
+  261  sudo apt update
+  262  apt install git
+  263  cd ..
+  264  ls
+  265  ssh -T git@github.com
+  266  cd backend
+  267  git add .
+  268  git commit -m "cloud-version"
+  269  git config --global user.name "Yahya"
+  270  git config --global user.email "yambox88@gmail.com"
+  271  git config --list
+  272  git commit -m "cloud-version"
+  273  git branch -M cloud
+  274  git push -u origin cloud
+  275  mkdir cloud
+  276  code cinni.yahyaghani.com
+  277  git add .
+  278  git commit -m "cloud-version"
+  279  git push -u origin cloud
+  280  cd cloud
+  281  ls
+  282  cd ..
+  283  ls
+  284  mv cinni.yahyaghani.com ./cloud
+  285  cd cloud
+  286  history > history.txt

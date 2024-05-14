@@ -1,11 +1,11 @@
 ## This is the Cinni-Proto-Backend##
 
 -current infra is the following combination 
-    chromadb
-    sqlite
-    custom clip models 
-    custom openai agents[using react paper implementations]
-    google_vision for object segmentation [we will ideally build if we can't find a really good clothing segmentation model in order to mask & segment each item on a text or image query ]
+-chromadb
+-sqlite
+-custom clip models 
+-custom openai agents[using react paper implementations]
+-google_vision for object segmentation [we will ideally build if we can't find a really good clothing segmentation model in order to mask & segment each item on a text or image query ]
 
 -python=3.10
 -conda prefered over venv/virtualenv

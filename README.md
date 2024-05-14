@@ -3,6 +3,7 @@
 This is the Cinni-Proto-Backend which uses a combination of technologies tailored for optimizing search and recommendation in the fashion industry.
 
 ## Current Infrastructure
+![Cinni Flow](/cinni-flow.jpg)
 
 - **ChromaDB**
 - **SQLite**

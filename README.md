@@ -32,18 +32,21 @@ This is the Cinni-Proto-Backend which uses a combination of technologies tailore
    ```sh
    python app.py
 
-
 ## References
 
 ### Articles and Papers
 
 - **Exploring CLIP: Bridging Text and Images**  
-  [Read more on arXiv](https://arxiv.org/abs/2202.02757)  
+  [Read more on arXiv](https://arxiv.org/abs/2202.02757) | [Direct PDF](https://arxiv.org/pdf/2202.02757)  
   A comprehensive study on how CLIP models bridge the gap between text descriptions and image content, enabling new ways to handle multimodal tasks.
 
 - **Advancements in Neural Networks for Fashion**  
   [Read more on arXiv](https://arxiv.org/abs/2404.14396)  
   Discusses recent neural network advancements specifically applied to the fashion industry, enhancing capabilities in image recognition and recommendation systems.
+
+- **A Review of Modern Fashion Recommender Systems**  
+  [Direct PDF](https://arxiv.org/pdf/2202.02757)  
+  This paper provides a detailed review of recommender systems operating within the fashion industry. It discusses challenges like dealing with sparse datasets, the need for personalization, and how visual and contextual data from various sources can significantly enhance recommendation strategies.
 
 ### Tools and Libraries
 
@@ -54,4 +57,3 @@ This is the Cinni-Proto-Backend which uses a combination of technologies tailore
 - **FashionML**  
   [Visit GitHub repository](https://github.com/federicoB/fashionML)  
   A GitHub repository showcasing machine learning techniques applied to fashion datasets. Useful for developers looking into fashion-related ML projects.
-

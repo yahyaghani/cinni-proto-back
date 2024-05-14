@@ -20,3 +20,16 @@ This is the Cinni-Proto-Backend which uses a combination of technologies tailore
 1. Install the required Python packages:
    ```sh
    pip install -r requirements.txt
+
+2. Environment variables:
+   ```sh
+   export OPENAI_API_KEY="yourkey"
+      ```sh
+   export GOOGLE_API_KEY="yourkey"
+   ```sh
+   export FLASK_APP=app.py
+
+3. Test :
+   ```sh
+   python app.py
+

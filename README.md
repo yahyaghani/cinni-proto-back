@@ -32,3 +32,26 @@ This is the Cinni-Proto-Backend which uses a combination of technologies tailore
    ```sh
    python app.py
 
+
+## References
+
+### Articles and Papers
+
+- **Exploring CLIP: Bridging Text and Images**  
+  [Read more on arXiv](https://arxiv.org/abs/2202.02757)  
+  A comprehensive study on how CLIP models bridge the gap between text descriptions and image content, enabling new ways to handle multimodal tasks.
+
+- **Advancements in Neural Networks for Fashion**  
+  [Read more on arXiv](https://arxiv.org/abs/2404.14396)  
+  Discusses recent neural network advancements specifically applied to the fashion industry, enhancing capabilities in image recognition and recommendation systems.
+
+### Tools and Libraries
+
+- **OpenAI CLIP**  
+  [Visit OpenAI](https://openai.com/index/clip/)  
+  OpenAI's CLIP is a neural network trained on a variety of (image, text) pairs. It learns visual concepts from natural language supervision.
+
+- **FashionML**  
+  [Visit GitHub repository](https://github.com/federicoB/fashionML)  
+  A GitHub repository showcasing machine learning techniques applied to fashion datasets. Useful for developers looking into fashion-related ML projects.
+

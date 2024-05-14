@@ -24,9 +24,7 @@ This is the Cinni-Proto-Backend which uses a combination of technologies tailore
 2. Environment variables:
    ```sh
    export OPENAI_API_KEY="yourkey"
-      ```sh
    export GOOGLE_API_KEY="yourkey"
-   ```sh
    export FLASK_APP=app.py
 
 3. Test :
